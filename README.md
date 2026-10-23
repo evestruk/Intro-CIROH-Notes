@@ -81,4 +81,10 @@ There are 3 types of data used for municipal decision-makers
  Increased floods around the nation due to major storms and elevating oceans. Data is being used to help understand risks and make preventative decisions. 
  **What kind of data is available to urban planning and home builders? How are structural engineers adapting homebuilding due to these increased floods and rising ocean? 
  **How does one prevent flooding besides retention ponds?
+
+
+
+ ## Next steps
+ explore google collab wit hjupyter notbooks
+ write some kind of notes (polish this one) for a newbie in the future. 
  
