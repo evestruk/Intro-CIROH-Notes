@@ -70,4 +70,32 @@ _ Point-type reservoir NetCDF (water surface elevation, inflow, outflow)
 >nwm.yyyymmdd
 where September 29th 2026 data would be on file as
 >nwm.20260929
+* More information about Google Cloud specific buckets can be found [HERE](https://docs.cloud.google.com/storage/docs/bucket-metadata)
+
+### Tutorial: Finding and Viewing NWM Data 
+*For this tutorial we will be using Google Cloud, ...*
+
+#### **1)** Access the [Google Cloud NWM Bucket HERE](https://console.cloud.google.com/storage/browser/national-water-model;tab=objects?utm_source=chatgpt.com&prefix=&forceOnObjectsSortingFiltering=false)
+From here you should recognize the folder names format >nwm.yyyymmdd
+Lets take a quick look at what all of these other folders are. 
+
+| Folder | What it is |
+| --- | --- |
+| analysis_assim/ | Analysis and assimilation model output. Estimates of current hydrologic conditions. |
+| forcing_analysis_assim/ | Weather data used to drive the analysis simulations. |
+| forcing_medium_range/ | Meteorological forecast inputs used to drive Medium-Range simulations. |
+| forcing_short_range/ | Meteorological forecast inputs used to drive Short-Range simulations. |
+| long_range_mem1/ | Long-Range forecast output, ensemble member 1. |
+| long_range_mem2/ | Long-Range forecast output, ensemble member 2. |
+| long_range_mem3/ | Long-Range forecast output, ensemble member 3. |
+| long_range_mem4/ | Long-Range forecast output, ensemble member 4. |
+| medium_range/ | Medium-Range forecast output. |
+| short_range/ | Short-Range forecast output. |
+| usgs_timeslices/ | USGS streamflow observation data organized into time-based files |
+
+* **Forcing data** is the weather information supplied to the model. Current precipitation, temperature, and weather forecasts are in these folders.
+* With the forcing data, the model estimates current water conditions in the **Analysis Folder**.
+For example, the forcing data provides the model with information that 2 inches of rain fell over a watershed. The analysis estimates that a nearby river flows at 150 cubic meters per second based on this information.
+* The **Forecast Folder** then predicts what will happen next. These predictions are then organized into the long, medium and short range folders. ☆ Ensembles are multiple versions of a forecast.
+Reference [Water NOAA Web](https://water.noaa.gov/about/nwm?utm_source=chatgpt.com) and [Output File Contents](https://water.noaa.gov/about/output_file_contents) for more info on organization. 
 * 
