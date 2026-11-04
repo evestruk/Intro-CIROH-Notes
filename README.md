@@ -113,7 +113,10 @@ Keeping your notebook and data file in the same folder makes it easier for Pytho
 1. In VS Code, open the Command Palette using `Ctrl + Shift + P`.
 2. Search for `Create: New Jupyter Notebook`.
 3. Select the command.
-4. Save the notebook with a name such as:
+4. Click File in the top menu.
+    - Select Save As...
+     - Navigate to the project folder you created.
+5. Save the notebook with a name such as:
 
 ```text
 nwm_streamflow_tutorial.ipynb
@@ -158,9 +161,9 @@ Download or otherwise make the selected `.nc` file accessible to your project.
 
 #### 2.2 Organize your project files
 
-Place the NetCDF file in the same folder as your Jupyter Notebook.
+Through your file explorer, place the NetCDF file in the same folder as your Jupyter Notebook.
 
-Your project should look similar to this:
+On VS Code *Explorer* side panel, your project should look similar to this:
 
 ```text
 hydroinformatics_research/
@@ -188,6 +191,7 @@ import matplotlib.pyplot as plt
 ```
 
 Run the cell using `Shift + Enter`.
+You will then be prompted to select a kernel. Select *Python Environment*. If you have multiple Python versions, choose the one you used when running the package installation command. Following this, click on your first notebook cell and rerun it (by using 'Shift + Enter')
 
 **What this does:** Imports the Python packages used throughout the tutorial.
 
@@ -204,7 +208,7 @@ print(ds)
 ```
 
 Run the cell.
-
+*replace "nwm.t00z.short_range.channel_rt.f009.conus.nc" with your nwm file name. 
 **What this does:**
 
 - `nc_name` stores the name of the NetCDF file.
@@ -294,6 +298,11 @@ print(ds["streamflow"].values[:10])
 This displays the first ten streamflow values in the dataset.
 
 Each value corresponds to a river feature ID.
+
+You may recieve an output containing a lot of zeros. There are a few possible reasons:
+1. Naturally low or no flow: Some river segments may be dry or have very little water.
+2. Small streams: Smaller waterways can have extremely low flow, sometimes represented as zero.
+3. Model output: The NWM calculates streamflow for millions of river segments, and not every segment will have measurable flow at every time.
 
 #### 4.2 Create a table of feature IDs and streamflow
 
@@ -509,3 +518,8 @@ Further development could include:
 ---
 
 **Result:** A repeatable Python workflow for opening NWM Channel Routed Output NetCDF files, extracting streamflow values by river feature ID, and visualizing the results.
+
+
+# Next step
+can i find or make an easy way to retrieve feature IDs and can i make a visual map through vs code? 
+also how do i start using claude?
