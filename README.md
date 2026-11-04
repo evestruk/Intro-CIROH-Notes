@@ -519,7 +519,12 @@ Further development could include:
 
 **Result:** A repeatable Python workflow for opening NWM Channel Routed Output NetCDF files, extracting streamflow values by river feature ID, and visualizing the results.
 
+## Using this coding format and the use of [River Feature ID finder](https://www.arcgis.com/apps/mapviewer/index.html?url=https://maps.water.noaa.gov/server/rest/services/reference/static_nwm_flowlines/FeatureServer/0&source=sd) i created this. 
 
-# Next step
-can i find or make an easy way to retrieve feature IDs and can i make a visual map through vs code? 
-also how do i start using claude?
+```python
+graph_streamflow(
+    [10376596, 10376584, 946020369, 10375992, 10376654, 10375924, 10375896, 10375840],
+    ds
+)
+```
+<img width="1190" height="590" alt="Utah Lake to Deer Creek" src="https://github.com/user-attachments/assets/18a6ad7c-d650-4471-8efc-55ab21bc71f5" />
