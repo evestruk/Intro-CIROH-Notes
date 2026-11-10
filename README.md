@@ -579,8 +579,3 @@ print("Streamflow data saved successfully.")
 This creates a CSV file containing the selected feature IDs, their corresponding streamflow values, and associated time information.
 
 The file can be opened using Excel, pandas, or other data-analysis software.
-
- ## Next steps
- explore google collab wit hjupyter notbooks
- write some kind of notes (polish this one) for a newbie in the future. 
- Add in a tutorial of setting up and extracting one of these files and then reading it. Obviously would need to complete this myself as well. 
