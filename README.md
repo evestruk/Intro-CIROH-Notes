@@ -162,132 +162,110 @@ You can easily find it by `ctrl + c` and `ctrl + v` into the `filter objects and
 
 Proceed to download the file 
 
-### Coding for Visual Streamflow Chart
-#### Tutorial: Opening and Visualizing National Water Model (NWM) Streamflow Data
+# Coding for Visual Streamflow Charts
+## Tutorial: Opening and Visualizing National Water Model (NWM) Streamflow Data in Google Colab
 
-This next part of the tutorial walks through how to open a National Water Model (NWM) NetCDF file, inspect its contents, extract streamflow values, and create a bar chart using Python.
+This tutorial explains how to open National Water Model (NWM) NetCDF files, extract streamflow values for specific river locations, create visualizations, and connect NWM feature IDs to river locations using an interactive map.
 
-The section is designed for beginners and uses Visual Studio Code (VS Code), Jupyter Notebook, and several Python packages.
-
-**End goal:** Create a chart showing NWM-predicted streamflow for selected river feature IDs.
+The tutorial uses the Provo River in Utah as an example, focusing on the river reach from Deer Creek Reservoir to Utah Lake.
 
 ---
 
-### Part 1: Prepare Your Environment
+# Part 1: Set Up Google Colab
 
-#### 1.1 Download the required software
+Google Colab is a browser-based environment that allows you to write and run Python code in a Jupyter Notebook without installing Python or setting up a local coding environment.
 
-Before starting, make sure you have the following installed:
+### 1.1 Open Google Colab
 
-| Software | Purpose | Download |
-|---|---|---|
-| Python | Programming language used to process the data. | [Download Python](https://www.python.org/downloads/) |
-| Visual Studio Code | Code editor used to run Python and Jupyter Notebooks. | [Download VS Code](https://code.visualstudio.com/) |
+1. Go to [Google Colab](https://colab.research.google.com/).
+2. Sign in with your Google account.
+3. Select **New Notebook**.
+4. Rename the notebook by clicking its title in the upper-left corner. For example:
 
-##### VS Code extensions
+   `NWM_Streamflow_Tutorial.ipynb`
 
-Open VS Code and select the Extensions icon in the left sidebar.
+5. Save the notebook to your Google Drive.
 
-Search for and install:
+### 1.2 Install Required Packages
 
-- **Python** — Microsoft
-- **Jupyter** — Microsoft
+Google Colab already includes Python, but we need to install the packages used to read and visualize NWM data.
 
-These extensions allow you to write and execute Python code in notebook cells directly inside VS Code.
+Create a code cell and run:
 
-#### 1.2 Download the required Python packages
+```python
+!pip install xarray netCDF4 numpy pandas matplotlib requests folium
+```
 
-Python packages provide additional functionality that is not included in the basic Python installation.
-
-The following packages are needed:
+These packages provide the following functionality:
 
 | Package | Purpose |
 |---|---|
-| `xarray` | Opens and works with NetCDF datasets. |
-| `netCDF4` | Supports reading NetCDF files. |
-| `numpy` | Performs numerical operations. |
-| `pandas` | Organizes data into tables. |
-| `matplotlib` | Creates charts and visualizations. |
-| `ipykernel` | Allows Jupyter Notebook to run Python code. |
+| `xarray` | Opens and analyzes NetCDF datasets |
+| `netCDF4` | Supports reading NetCDF files |
+| `numpy` | Handles numerical data |
+| `pandas` | Organizes data into tables |
+| `matplotlib` | Creates graphs and charts |
+| `requests` | Retrieves data from online APIs |
+| `folium` | Creates interactive maps |
 
-##### Install the packages
-
-1. Open VS Code.
-2. Select **Terminal** in the top menu.
-3. Select **New Terminal**.
-4. Copy and paste the following command into the terminal.
-
-```powershell
-python -m pip install xarray netCDF4 numpy pandas matplotlib ipykernel
-```
-
-Press Enter and allow the packages to install.
-
-**What this does:** Installs all the Python libraries needed to open, process, and visualize NWM data.
-
-#### 1.3 Create a project folder
-
-In your file explorer app, create a new folder for your project.
-
-For example:
-
-```text
-hydroinformatics_research/
-```
-
-Open this folder in VS Code:
-
-1. Select **File**.
-2. Select **Open Folder**.
-3. Find and select your new project folder.
-
-Keeping your notebook and data file in the same folder makes it easier for Python to locate the NetCDF file.
-
-## 1.4 Create a Jupyter Notebook
-
-1. In VS Code, open the Command Palette using `Ctrl + Shift + P`.
-2. Search for `Create: New Jupyter Notebook`.
-3. Select the command.
-4. Click File in the top menu.
-    - Select Save As...
-     - Navigate to the project folder you created.
-5. Save the notebook with a name such as:
-
-```text
-nwm_streamflow_tutorial.ipynb
-```
-
-A Jupyter Notebook allows you to run Python code in separate cells and view the results directly below each cell.
+**Note:** If the Colab runtime disconnects or resets, you may need to run the installation cell again.
 
 ---
 
-### Part 2: Obtain an NWM NetCDF File
-*If you have already completed the previous setup steps and are repeating this tutorial on the same computer, you can skip ahead to this section.*
+# Part 2: Obtain an NWM NetCDF File
 
-#### 2.2 Organize your project files
+The National Water Model stores its output data in NetCDF files. These files contain information about modeled river conditions, including streamflow and velocity.
 
-Through your file explorer, place the `nwm.t00z.short_range.channel_rt.f009.conus.nc` NetCDF file in the same folder as your Jupyter Notebook.
+### 2.1 Locate an NWM File
 
-On VS Code *Explorer* side panel, your project should look similar to this:
+For this tutorial, we will use an NWM short-range channel routing output file.
 
-```text
-hydroinformatics_research/
-│
-├── nwm_streamflow_tutorial.ipynb
-│
-└── nwm.t00z.short_range.channel_rt.f009.conus.nc
+An example filename is:
+
+`nwm.t00z.short_range.channel_rt.f009.conus.nc`
+
+The filename provides information about the dataset:
+
+| Filename component | Meaning |
+|---|---|
+| `nwm` | National Water Model |
+| `t00z` | Forecast initialized at 00:00 UTC |
+| `short_range` | Short-range forecast |
+| `channel_rt` | Channel routing output |
+| `f009` | Forecast hour 9 |
+| `conus` | Continental United States |
+| `.nc` | NetCDF file format |
+
+### 2.2 Upload the NetCDF File to Google Colab
+
+Download the desired NetCDF file from the Google Cloud NWM data bucket.
+
+Once you have the file:
+
+1. Open the **Files** panel on the left side of Google Colab.
+2. Select the upload icon.
+3. Choose your downloaded `.nc` file.
+4. Wait for the upload to finish.
+
+Alternatively, you can upload a file using Python:
+
+```python
+from google.colab import files
+
+uploaded = files.upload()
 ```
 
-This allows the notebook to reference the file by its filename without needing a full computer-specific path.
+Select the NetCDF file when the upload window appears.
 
-Note: If you are using a different date or forecast file, make sure to use the corresponding NetCDF file throughout the tutorial
+**Important:** Uploaded files are stored temporarily in the Colab runtime. If the runtime disconnects or resets, you may need to upload the file again.
+
 ---
 
-### Part 3: Open and Inspect the NetCDF File
+# Part 3: Open and Inspect the NetCDF Dataset
 
-#### 3.1 Import the required packages
+### 3.1 Import the Required Libraries
 
-In the first notebook cell, copy and paste:
+Create a new code cell and run:
 
 ```python
 import xarray as xr
@@ -296,14 +274,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 ```
 
-Run the cell using `Shift + Enter`.
-You will then be prompted to select a kernel. Select *Python Environment*. If you have multiple Python versions, choose the one you used when running the package installation command. Following this, click on your first notebook cell and rerun it (by using 'Shift + Enter')
+### 3.2 Open the NetCDF File
 
-**What this does:** Imports the Python packages used throughout the tutorial.
-
-#### 3.2 Open the NetCDF file
-
-In a new notebook cell, copy and paste:
+Set the filename to match the exact name of the file you uploaded.
 
 ```python
 nc_name = "nwm.t00z.short_range.channel_rt.f009.conus.nc"
@@ -313,133 +286,89 @@ ds = xr.open_dataset(nc_name)
 print(ds)
 ```
 
-Run the cell.
+This opens the NetCDF file using `xarray` and displays an overview of the dataset.
 
-**What this does:**
+### 3.3 Understand the Dataset Dimensions
 
-- `nc_name` stores the name of the NetCDF file.
-- `xr.open_dataset()` opens the file.
-- `ds` stores the resulting dataset.
-- `print(ds)` displays the dataset's structure.
+The dataset contains several dimensions that organize the information.
 
-You should see information about the dimensions, coordinates, variables, and metadata.
+| Dimension | Description |
+|---|---|
+| `feature_id` | Unique identifier for an individual river segment |
+| `time` | Valid time of the forecast data |
+| `reference_time` | Time when the forecast was initialized |
 
-#### 3.3 Understand the dataset dimensions
+To display the dimensions:
 
-An example NWM Channel Routed Output dataset may contain:
-
-```text
-Dimensions:
-    feature_id: 2729077
-    time: 1
-    reference_time: 1
+```python
+print(ds.dims)
 ```
 
-These dimensions tell us how the data are organized.
-
-| Dimension | Meaning |
-|---|---|
-| `feature_id` | Individual river or stream channel identifiers. |
-| `time` | Forecast valid time. |
-| `reference_time` | Forecast initialization/reference time. |
-
-The `feature_id` dimension is particularly important because it allows us to identify streamflow values associated with specific river segments.
-
-#### 3.4 Inspect the available variables
-
-To see the variables stored in the dataset:
+To display the variables:
 
 ```python
 print(ds.data_vars)
 ```
 
-Common variables in Channel Routed Output files include:
+Some of the variables available in NWM channel routing output files include:
 
 - `streamflow`
-- `nudge`
 - `velocity`
+- `nudge`
 - `qSfcLatRunoff`
 - `qBucket`
 - `qBtmVertRunoff`
 
 For this tutorial, we will focus on `streamflow`.
 
-#### 3.5 Inspect the streamflow variable
-
-Copy and paste:
+### 3.4 Inspect the Streamflow Variable
 
 ```python
 print(ds["streamflow"])
 ```
 
-The output should identify:
+This displays information about the streamflow variable, including its dimensions, attributes, and units.
 
-- The variable name.
-- Its dimensions.
-- Its data type.
-- Its units.
-- Its metadata.
+NWM streamflow is measured in cubic meters per second:
 
-For example:
-
-```text
-long_name: River Flow
-units: m3 s-1
-```
-
-This tells us that streamflow is measured in cubic meters per second (m³/s).
+**m³/s**
 
 ---
 
-### Part 4: Extract Streamflow Data
+# Part 4: Extract Streamflow Values
 
-#### 4.1 Display the first ten streamflow values
+### 4.1 Display the First 10 Streamflow Values
 
-Copy and paste:
-
-```python
-print(ds["streamflow"].values[:10])
-```
-
-This displays the first ten streamflow values in the dataset.
-
-Each value corresponds to a river feature ID.
-
-You may receive an output containing a lot of zeros. There are a few possible reasons:
-
-1. Naturally low or no flow: Some river segments may have very little or no modeled flow.
-2. Small streams: Smaller waterways can have extremely low flow.
-3. Model output: The NWM calculates streamflow for millions of river segments, and not every segment will have measurable flow at every time.
-
-#### 4.2 Create a table of feature IDs and streamflow
-
-To make the data easier to interpret, convert the streamflow variable into a pandas DataFrame.
+To get a quick look at the streamflow data:
 
 ```python
-streamflow_df = ds[["streamflow"]].to_dataframe().reset_index()
+streamflow = ds["streamflow"].values.flatten()
 
-print(streamflow_df.head(10))
+print(streamflow[:10])
 ```
 
-The resulting table should contain columns similar to:
+The `.values` command retrieves the numerical data, while `.flatten()` converts it into a one-dimensional array.
 
-| feature_id | streamflow |
-|---:|---:|
-| 101 | 9.16 |
-| 179 | 0.00 |
-| 181 | 0.00 |
-| 183 | 0.00 |
-| 185 | 0.00 |
+### 4.2 Organize the Data into a Table
 
-The `feature_id` column identifies the river segment, while the `streamflow` column contains its modeled flow value.
+We can use Pandas to display the streamflow values alongside their corresponding feature IDs.
 
-Depending on the dataset, additional columns such as `time` and `reference_time` may also appear.
+```python
+df = pd.DataFrame({
+    "Feature ID": ds["feature_id"].values,
+    "Streamflow (m3/s)": streamflow
+})
 
-## 4.3 Select specific river feature IDs
+print(df.head(10))
+```
 
-Instead of using the first entries in the dataset, we can select specific river feature IDs. The feature IDs below follow Deer Creek to Utah Lake through the Provo River.
+This creates a table showing the first 10 river segments and their corresponding streamflow values.
 
-First, define the IDs we want to examine:
+### 4.3 Select Specific Feature IDs
+
+Instead of examining every river segment in the CONUS dataset, we can extract values for specific locations.
+
+For this example, we will use selected feature IDs along the Provo River, from Deer Creek Reservoir toward Utah Lake.
 
 ```python
 feature_ids = [
@@ -460,14 +389,28 @@ feature_ids = [
     10376040,
     10376080,
     10376596,
-    10376192,
+    10376192
 ]
 ```
 
-Check which IDs are available:
+### 4.4 Extract the Selected Streamflow Values
 
 ```python
-available_ids = ds.feature_id.values
+selected_streamflow = ds["streamflow"].sel(
+    feature_id=feature_ids
+).values.flatten()
+
+print(selected_streamflow)
+```
+
+The `.sel()` function selects the streamflow values associated with the specified feature IDs.
+
+### 4.5 Check That the Feature IDs Exist
+
+It is important to verify that all selected feature IDs are present in the dataset.
+
+```python
+available_ids = ds["feature_id"].values
 
 valid_ids = [
     fid for fid in feature_ids
@@ -479,218 +422,260 @@ missing_ids = [
     if fid not in available_ids
 ]
 
-print("Available IDs:", valid_ids)
-print("Missing IDs:", missing_ids)
+print("Valid Feature IDs:", valid_ids)
+print("Missing Feature IDs:", missing_ids)
 ```
 
-This checks whether each requested feature ID exists in the current NetCDF file.
-
-**Important:** Not every NetCDF file necessarily contains every requested feature ID. If an ID is missing, it may not be included in that particular dataset.
+If a feature ID is missing, it may not be included in that particular dataset.
 
 ---
 
-### Part 5: Create a Streamflow Chart
+# Part 5: Create a Streamflow Bar Chart
 
-To make this process reusable, create a function that accepts a list of feature IDs.
+We can visualize the extracted streamflow values using Matplotlib.
 
-Copy and paste the entire function into a new notebook cell:
+### 5.1 Create the Graphing Function
+
+The following function creates a bar chart showing streamflow for each selected feature ID.
 
 ```python
 def graph_streamflow(feature_ids, ds):
 
-    available_ids = ds.feature_id.values
+    streamflow = ds["streamflow"].sel(
+        feature_id=feature_ids
+    ).values.flatten()
 
-    valid_ids = [
-        fid for fid in feature_ids
-        if fid in available_ids
-    ]
-
-    missing_ids = [
-        fid for fid in feature_ids
-        if fid not in available_ids
-    ]
-
-    if not valid_ids:
-        print("None of the selected IDs were found.")
-        return
-
-    selected = ds.sel(feature_id=valid_ids)
-
-    streamflow_values = selected["streamflow"].squeeze()
-
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(14, 6))
 
     plt.bar(
-        selected.feature_id.values.astype(str),
-        streamflow_values.values
+        range(len(feature_ids)),
+        streamflow
     )
 
-    plt.xlabel("River Feature ID")
+    plt.xlabel("Feature ID")
     plt.ylabel("Streamflow (m³/s)")
-    plt.title("NWM Streamflow: Deer Creek to Utah Lake")
+
+    plt.xticks(
+        range(len(feature_ids)),
+        feature_ids,
+        rotation=45
+    )
+
+    plt.title("NWM Streamflow – Provo River")
 
     plt.figtext(
-    0.5, 0.91,
-    " Short Range | Provo River | Initialization: 00:00 UTC | Forecast: +9 Hours",
-    ha="center",
-    fontsize=9
+        0.5,
+        0.01,
+        "Location: Deer Creek Reservoir to Utah Lake | "
+        "Variable: Streamflow | Units: m³/s",
+        ha="center",
+        fontsize=9
+    )
 
-    plt.xticks(rotation=45)
-    plt.tight_layout()
+    plt.grid(axis="y", alpha=0.3)
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
+
     plt.show()
-
-    if missing_ids:
-        print("IDs not found:", missing_ids)
 ```
 
-Run the cell to define the function.
+### 5.2 Generate the Graph
 
-Now call the function using your selected feature IDs from Section 4.3:
+Run the function using the selected feature IDs:
 
 ```python
 graph_streamflow(feature_ids, ds)
 ```
 
-The function will:
+The resulting graph displays the streamflow values for the selected river segments.
 
-1. Check which feature IDs exist in the dataset.
-2. Select the available IDs.
-3. Retrieve their streamflow values.
-4. Create a bar chart.
-5. Report any missing IDs.
-
-You can change the feature ID list in Section 4.3 whenever you want to visualize different river segments.
+Each bar represents one feature ID, allowing us to compare modeled streamflow at different locations along the river.
 
 ---
-Here is the graph based on the date Sept 17th 2018. Based on the date you selected, the data will vary. 
-<img width="1190" height="590" alt="f3e07cb8-bb98-48d9-af09-038db341f578" src="https://github.com/user-attachments/assets/57ae3aa9-d02d-47c9-b351-cb766b9eb02b" />
 
+# Part 6: Export the Extracted Data
 
-### Part 6: Save Your Extracted Data
+The extracted streamflow values can also be saved as a CSV file for additional analysis.
 
-Once the data have been extracted, they can be saved as a CSV file for later analysis.
+### 6.1 Create a DataFrame
 
 ```python
-selected_df = ds.sel(feature_id=valid_ids)[["streamflow"]].to_dataframe().reset_index()
+streamflow_df = pd.DataFrame({
+    "Feature ID": feature_ids,
+    "Streamflow (m3/s)": selected_streamflow
+})
 
-selected_df.to_csv("selected_streamflow.csv", index=False)
-
-print("Streamflow data saved successfully.")
+print(streamflow_df)
 ```
 
-This creates a CSV file containing the selected feature IDs, their corresponding streamflow values, and associated time information.
+### 6.2 Export the CSV
 
-The file can be opened using Excel, pandas, or other data-analysis software.
-
-## Created an Interactive Map to Find Feature ID's
-``` python
-import requests
-
-# --- Define the API endpoint ---
-# This is NOAA's ArcGIS Feature Service for NWM Flowlines, Layer 0
-url = "https://maps.water.noaa.gov/server/rest/services/reference/static_nwm_flowlines/FeatureServer/0/query"
-
-# --- Define a bounding box around the Provo River ---
-# This covers Deer Creek Dam down to Utah Lake
-# Format: xmin, ymin, xmax, ymax (longitude/latitude in decimal degrees)
-bbox = "-111.90,40.10,-111.40,40.50"
-
-# --- Set query parameters ---
-params = {
-    "where": "1=1",           # Return all features in the area (no name filter yet)
-    "geometry": bbox,          # Only return features inside our bounding box
-    "geometryType": "esriGeometryEnvelope",  # The bounding box shape type
-    "inSR": "4326",            # Input coordinate system (standard lat/lon)
-    "outSR": "4326",           # Output coordinate system (standard lat/lon)
-    "outFields": "*",          # Return ALL available fields so we can see what exists
-    "f": "geojson",            # Return data in GeoJSON format (easy to work with)
-    "resultRecordCount": 5     # Only get 5 records for now — just a quick test
-}
-
-# --- Send the request ---
-print("Sending request to NOAA API...")
-response = requests.get(url, params=params)
-
-# --- Check if it worked ---
-print(f"Status code: {response.status_code}")  # 200 means success
-
-if response.status_code == 200:
-    data = response.json()
-    
-    # How many features came back?
-    features = data.get("features", [])
-    print(f"\nNumber of features returned: {len(features)}")
-    
-    # Look at the first feature
-    if features:
-        first = features[0]
-        print("\n--- Fields available in the data ---")
-        for key, value in first["properties"].items():
-            print(f"  {key}: {value}")
-else:
-    print("Request failed. Check the URL and your internet connection.")
+```python
+streamflow_df.to_csv(
+    "selected_streamflow.csv",
+    index=False
+)
 ```
 
-and 
+### 6.3 Download the CSV from Colab
+
+```python
+from google.colab import files
+
+files.download("selected_streamflow.csv")
+```
+
+This downloads the CSV file to your computer.
+
+---
+
+# Part 7: Connect Feature IDs to River Locations
+
+The feature IDs used in the NWM dataset correspond to individual river segments in the National Water Model's river network.
+
+To understand where these segments are located, we can retrieve river flowline information from NOAA's National Water Model reference flowlines service.
+
+This allows us to visualize the river network and identify the feature IDs associated with individual river segments.
+
+### 7.1 Retrieve River Flowline Data
+
+We will use NOAA's ArcGIS REST API:
+
+[NOAA Static NWM Flowlines Feature Service](https://maps.water.noaa.gov/server/rest/services/reference/static_nwm_flowlines/FeatureServer/0/query)
+
+First, import the required libraries:
+
 ```python
 import requests
 import folium
+```
 
-# --- Query the NOAA API for ALL river segments in our area ---
-url = "https://maps.water.noaa.gov/server/rest/services/reference/static_nwm_flowlines/FeatureServer/0/query"
+### 7.2 Define the Study Area
 
+The following bounding box covers the Provo River study area.
+
+```python
 bbox = "-111.90,40.10,-111.40,40.50"
+```
+
+The coordinates represent:
+
+- Minimum longitude: -111.90
+- Minimum latitude: 40.10
+- Maximum longitude: -111.40
+- Maximum latitude: 40.50
+
+### 7.3 Query NOAA's Flowline Service
+
+```python
+url = (
+    "https://maps.water.noaa.gov/server/rest/services/"
+    "reference/static_nwm_flowlines/FeatureServer/0/query"
+)
 
 params = {
-    "where": "1=1",
     "geometry": bbox,
     "geometryType": "esriGeometryEnvelope",
-    "inSR": "4326",
+    "spatialRel": "esriSpatialRelIntersects",
+    "outFields": "feature_id,name,nwm_vers,strm_order",
+    "returnGeometry": "true",
     "outSR": "4326",
-    "outFields": "feature_id,name,nwm_vers,strm_order",  # Only the fields we need
-    "f": "geojson",
-    "resultRecordCount": 1000   # Get up to 1000 segments
+    "f": "geojson"
 }
 
-print("Fetching river data...")
 response = requests.get(url, params=params)
+
 data = response.json()
-features = data.get("features", [])
-print(f"Retrieved {len(features)} river segments")
 
-# --- Build the Folium map ---
-# Center on Provo, Utah
-provo_lat, provo_lon = 40.2338, -111.6585
-
-m = folium.Map(location=[provo_lat, provo_lon], zoom_start=11)
-
-# --- Add each river segment to the map ---
-for feature in features:
-    props = feature["properties"]
-    geom  = feature["geometry"]
-
-    # Build the popup text shown when you click a segment
-    popup_text = f"""
-    <b>Feature ID:</b> {props.get('feature_id', 'N/A')}<br>
-    <b>Name:</b> {props.get('name', 'N/A')}<br>
-    <b>NWM Version:</b> {props.get('nwm_vers', 'N/A')}<br>
-    <b>Stream Order:</b> {props.get('strm_order', 'N/A')}
-    """
-
-    folium.GeoJson(
-        feature,
-        style_function=lambda x: {
-            "color": "steelblue",
-            "weight": 2,
-            "opacity": 0.7
-        },
-        popup=folium.Popup(popup_text, max_width=250)
-    ).add_to(m)
-
-# --- Display the map ---
-print("Map ready — click any blue river segment to see its feature ID.")
-m
+print("Number of flowlines:", len(data["features"]))
 ```
-<img width="901" height="586" alt="image" src="https://github.com/user-attachments/assets/ca034957-4f8b-472a-af08-1a760b7381f7" />
-<img width="890" height="570" alt="image" src="https://github.com/user-attachments/assets/d372c053-f7fb-487a-80d4-0360484d3a66" />
 
+This retrieves flowline information within the specified bounding box.
+
+### 7.4 Create an Interactive Map
+
+We can use Folium to display the flowlines on an interactive map.
+
+```python
+m = folium.Map(
+    location=[40.2338, -111.6585],
+    zoom_start=11,
+    tiles="OpenStreetMap"
+)
+
+folium.GeoJson(
+    data,
+    name="NWM Flowlines",
+    style_function=lambda feature: {
+        "color": "blue",
+        "weight": 2
+    },
+    tooltip=folium.GeoJsonTooltip(
+        fields=["feature_id", "name", "strm_order"],
+        aliases=["Feature ID:", "River Name:", "Stream Order:"]
+    )
+).add_to(m)
+
+folium.LayerControl().add_to(m)
+
+display(m)
+```
+
+The map displays river flowlines within the study area.
+
+You can zoom in, move around the map, and click individual river segments to view their associated information.
+
+---
+
+# Part 8: Understanding the Connection Between the Map and Streamflow Data
+
+The interactive map and the NetCDF dataset provide two different ways of examining the National Water Model.
+
+**The map provides geographic information:**
+- Where individual river segments are located.
+- The feature ID associated with each segment.
+- Additional flowline information, such as river name and stream order.
+
+**The NetCDF file provides modeled information:**
+- Streamflow for each feature ID.
+- Velocity for each feature ID.
+- Other channel routing variables.
+
+The `feature_id` is the connection between these two datasets.
+
+For example, if a river segment on the map has feature ID `10375840`, we can use that same ID to retrieve its streamflow value from the NetCDF file.
+
+This makes it possible to connect the geographic location of a river segment with its modeled hydrologic conditions.
+
+---
+
+# Part 9: Potential Next Steps
+
+Once the basic workflow is working, the notebook can be expanded to support additional analysis.
+
+Possible next steps include:
+
+1. **Compare multiple years:** Open NetCDF files from different years and compare streamflow at the same feature IDs.
+2. **Create time-series graphs:** Examine how streamflow changes over time at selected river locations.
+3. **Compare additional variables:** Examine velocity and other channel routing variables alongside streamflow.
+4. **Improve the interactive map:** Display selected feature IDs and their corresponding streamflow values when a river segment is clicked.
+5. **Automate data retrieval:** Retrieve NetCDF files directly from the Google Cloud bucket instead of manually downloading and uploading them.
+
+These additions can help build a more flexible workflow for examining historical NWM forecasts and comparing modeled river conditions across different locations and dates.
+
+---
+
+## Summary
+
+This tutorial demonstrated how to:
+
+- Set up a Google Colab notebook.
+- Install and import the required Python packages.
+- Upload and open an NWM NetCDF file.
+- Inspect dataset dimensions and variables.
+- Extract streamflow values for selected feature IDs.
+- Create a streamflow bar chart.
+- Export streamflow data to a CSV file.
+- Retrieve NOAA river flowline information.
+- Display an interactive map connecting feature IDs to geographic river locations.
+
+The overall goal is to create a reproducible workflow that connects NWM forecast data with geographic river information, allowing streamflow conditions to be examined at specific locations along a river network.
